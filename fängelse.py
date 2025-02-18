@@ -1,233 +1,114 @@
-import random
+import sys
+import time
 
-# ======= Player Class =======
-class Player:
-    def __init__(self):
-        self.health = 100
-        self.inventory = []
-        self.position = "Cellen"
+# Funktion för att skriva text långsamt
+def slow_print(text):
+    for char in text:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        time.sleep(0.03)  # Anpassa för snabbare eller långsammare text
+    print()
 
-    def add_item(self, item):
-        self.inventory.append(item)
 
-    def show_inventory(self):
-        print("\nDin ryggsäck innehåller:")
-        for item in self.inventory:
-            print(f"- {item}")
-        if not self.inventory:
-            print("(Inget i ryggsäcken än!)")
+def main():
+    slow_print("\nVälkommen till det magiska slottet! Du är inlåst i en fängelsehåla och måste hitta en väg ut.")
+    show_instructions()
+    start_room()
 
-# ======= Room Class =======
-class Room:
-    def __init__(self, name, description, options, puzzle=None, enemy=None):
-        self.name = name
-        self.description = description
-        self.options = options
-        self.puzzle = puzzle
-        self.enemy = enemy
-        self.puzzle_solved = False
 
-    def enter_room(self, player):
-        print(f"\nDu är i {self.name}.")
-        print(self.description)
-        
-        if self.enemy:
-            self.battle(player)
-
-        if self.puzzle and not self.puzzle_solved:
-            self.solve_puzzle(player)
-
-        for i, option in enumerate(self.options, 1):
-            print(f"{i}. {option}")
-
-        choice = input("Vad vill du göra? ")
-        return choice
-
-    def solve_puzzle(self, player):
-        print(f"\nPussel: {self.puzzle['question']}")
-        answer = input("Svar: ")
-        if answer.lower() == self.puzzle['answer'].lower():
-            print(self.puzzle['success_message'])
-            if 'reward' in self.puzzle:
-                player.add_item(self.puzzle['reward'])
-                print(f"Du fick {self.puzzle['reward']}!")
-            self.puzzle_solved = True
-        else:
-            print(self.puzzle['failure_message'])
-
-    def battle(self, player):
-        print(f"\nEn {self.enemy['name']} blockerar vägen!")
-        while player.health > 0 and self.enemy['health'] > 0:
-            attack = random.randint(5, 15)
-            self.enemy['health'] -= attack
-            print(f"Du träffade {self.enemy['name']} och gjorde {attack} skada!")
-
-            if self.enemy['health'] <= 0:
-                print(f"Du besegrade {self.enemy['name']}!")
-                break
-
-            enemy_attack = random.randint(5, 15)
-            player.health -= enemy_attack
-            print(f"{self.enemy['name']} träffade dig och gjorde {enemy_attack} skada!")
-
-        if player.health <= 0:
-            print("\nDu blev besegrad...")
-            exit()
-
-# ======= Game Data =======
-rooms = {
-    "Cellen": Room(
-        name="Cellen",
-        description="Du vaknar i en kall, mörk cell. Dörren är låst.",
-        options=["Inspektera cellen", "Försök öppna dörren"],
-        puzzle={
-            "question": "Du hittar en låda med ett kodlås: Vad är 2 + 2?",
-            "answer": "4",
-            "success_message": "Låset klickar till och lådan öppnas! Du hittar en nyckel.",
-            "failure_message": "Fel svar. Lådan förblir låst.",
-            "reward": "Nyckel"
-        }
-    ),
-    "Korridoren": Room(
-        name="Korridoren",
-        description="En lång, mörk korridor sträcker sig åt höger och vänster.",
-        options=["Gå höger", "Gå vänster"],
-        enemy={
-            "name": "Leksakssoldat",
-            "health": 30
-        }
-    ),
-    "Magiskt förråd": Room(
-        name="Magiskt förråd",
-        description="Ett rum fyllt med glittrande föremål och magiska ting.",
-        options=["Ta ett magiskt föremål", "Gå tillbaka till korridoren"],
-        puzzle={
-            "question": "Vilken färg blandar du för att få lila? (Röd, blå, grön)",
-            "answer": "Röd och blå",
-            "success_message": "Du löste pusslet och ett föremål framträder!",
-            "failure_message": "Fel svar. Försök igen senare.",
-            "reward": "Magisk nyckel"
-        }
-    ),
-    "Dolda Trädgården": Room(
-        name="Dolda Trädgården",
-        description="En vacker, hemlig trädgård med mystiska växter och statyer.",
-        options=["Undersök statyerna", "Gå vidare till nästa rum"],
-        puzzle={
-            "question": "Statyn frågar: 'Jag har grenar men inga löv, vad är jag?'.",
-            "answer": "Ett träd",
-            "success_message": "Statyns ögon lyser upp och en hemlig väg öppnas!",
-            "failure_message": "Statyn förblir tyst."
-        }
-    ),
-    "Väktarens Kammare": Room(
-        name="Väktarens Kammare",
-        description="Ett mörkt rum där en mäktig väktare väntar på att pröva dig.",
-        options=["Utmana väktaren", "Gå tillbaka till trädgården"],
-        enemy={
-            "name": "Mäktig Väktare",
-            "health": 50
-        }
-    ),
-    "Frihetens Port": Room(
-        name="Frihetens Port",
-        description="En massiv port med lysande symboler som leder till frihet.",
-        options=["Använd Magisk nyckel", "Gå tillbaka till Väktarens Kammare"]
-    )
-}
-
-# ======= Game Logic =======
 def show_instructions():
-    try:
-        with open("instructions.txt", "r") as file:
-            print(file.read())
-    except FileNotFoundError:
-        print("Instruktionsfilen hittades inte.")
+    slow_print("\nInstruktioner:")
+    slow_print("1. Du kommer att få olika val under spelets gång.")
+    slow_print("2. Ange det nummer eller den text som matchar ditt val.")
+    slow_print("3. Ditt mål är att fly från slottet genom att fatta rätta beslut.")
 
-def main_menu():
-    print("\n=== Fängelsesspelet ===")
-    print("1. Starta nytt spel")
-    print("2. Visa instruktioner")
-    print("3. Avsluta")
-    
-    choice = input("Välj ett alternativ: ")
-    return choice
 
-def game_loop(player):
-    while True:
-        current_room = rooms[player.position]
-        choice = current_room.enter_room(player)
+def start_room():
+    slow_print("\nDu är i en fängelsehåla. Rummet är kallt och mörkt.")
+    slow_print("Vad vill du göra?")
+    slow_print("1. Inspektera cellen")
+    slow_print("2. Försök öppna dörren")
+    slow_print("3. Visa instruktionerna igen")
 
-        if player.position == "Cellen":
-            if choice == "1":
-                print("Du hittar en låda med ett kodlås.")
-            elif choice == "2":
-                if "Nyckel" in player.inventory:
-                    print("Du låser upp dörren och går vidare till korridoren.")
-                    player.position = "Korridoren"
-                else:
-                    print("Dörren är låst. Du behöver en nyckel.")
-
-        elif player.position == "Korridoren":
-            if choice == "1":
-                print("Du går höger och möter en fiende!")
-                current_room.battle(player)
-            elif choice == "2":
-                print("Du går vänster och hittar en dörr som leder till det magiska förrådet.")
-                player.position = "Magiskt förråd"
-
-        elif player.position == "Magiskt förråd":
-            if choice == "1":
-                print("Du plockar upp ett magiskt föremål.")
-                if not current_room.puzzle_solved:
-                    print("Du måste lösa pusslet först!")
-                else:
-                    player.add_item("Magiskt föremål")
-            elif choice == "2":
-                print("Du går vidare till den dolda trädgården.")
-                player.position = "Dolda Trädgården"
-
-        elif player.position == "Dolda Trädgården":
-            if choice == "1":
-                print("Du undersöker statyerna.")
-            elif choice == "2":
-                print("Du går vidare till Väktarens Kammare.")
-                player.position = "Väktarens Kammare"
-
-        elif player.position == "Väktarens Kammare":
-            if choice == "1":
-                print("Du utmanar väktaren!")
-                current_room.battle(player)
-            elif choice == "2":
-                print("Du går tillbaka till den dolda trädgården.")
-                player.position = "Dolda Trädgården"
-
-        elif player.position == "Frihetens Port":
-            if choice == "1":
-                if "Magisk nyckel" in player.inventory:
-                    print("Du använder den magiska nyckeln och porten öppnas! Du är fri!")
-                    break
-                else:
-                    print("Du behöver den magiska nyckeln för att öppna porten.")
-            elif choice == "2":
-                print("Du går tillbaka till Väktarens Kammare.")
-                player.position = "Väktarens Kammare"
-
-        else:
-            print("Ogiltigt val. Försök igen.")
-
-# ======= Main Program =======
-player = Player()
-
-while True:
-    choice = main_menu()
+    choice = input("Välj ett alternativ (1/2/3): ")
 
     if choice == "1":
-        game_loop(player)
+        inspect_cell()
     elif choice == "2":
-        show_instructions()
+        try_open_door()
     elif choice == "3":
-        print("Hejdå!")
-        break
+        show_instructions()
+        start_room()
     else:
-        print("Ogiltigt val. Försök igen.")
+        slow_print("Ogiltigt val. Försök igen.")
+        start_room()
+
+
+def inspect_cell():
+    slow_print("\nDu hittar en nyckel under sängen!")
+    slow_print("1. Ta nyckeln och försök öppna dörren")
+    slow_print("2. Undersök vidare")
+
+    choice = input("Välj ett alternativ (1/2): ")
+
+    if choice == "1":
+        slow_print("\nDu använder nyckeln och lyckas låsa upp dörren.")
+        corridor()
+    elif choice == "2":
+        slow_print("\nDu hittar inget mer av värde.")
+        start_room()
+    else:
+        slow_print("Ogiltigt val. Försök igen.")
+        inspect_cell()
+
+
+def try_open_door():
+    slow_print("\nDörren är låst. Du behöver en nyckel.")
+    start_room()
+
+
+def corridor():
+    slow_print("\nDu är nu i en korridor. Det finns två vägar att välja:")
+    slow_print("1. Gå vänster")
+    slow_print("2. Gå höger")
+
+    choice = input("Välj ett alternativ (1/2): ")
+
+    if choice == "1":
+        friendly_guard()
+    elif choice == "2":
+        color_puzzle()
+    else:
+        slow_print("Ogiltigt val. Försök igen.")
+        corridor()
+
+
+def friendly_guard():
+    slow_print("\nDu möter en magisk väktare som ler och ger dig en ledtråd.")
+    slow_print("Ledtråd: Nyckeln till friheten är färgens hemlighet!")
+    corridor()
+
+
+def color_puzzle():
+    slow_print("\nDu står framför en dörr med tre knappar: röd, grön och blå.")
+    slow_print("Vilken färg vill du trycka på?")
+
+    choice = input("Välj färg (röd/grön/blå): ")
+
+    if choice.lower() == "grön":
+        slow_print("\nDu trycker på den gröna knappen och dörren öppnas!")
+        final_room()
+    else:
+        slow_print("\nFel knapp! Försök igen.")
+        color_puzzle()
+
+
+def final_room():
+    slow_print("\nGrattis! Du har nått det sista rummet och lyckats fly från det magiska slottet.")
+    slow_print("Tack för att du spelade!")
+    sys.exit()
+
+
+if __name__ == "__main__":
+    main()
+
